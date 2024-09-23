@@ -1,21 +1,32 @@
-import { Canvas } from "@react-three/fiber";
-import { Box } from "./components/Box";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Home } from "./pages/Home";
+
+import "./index.css";
+import { OrthographicCamera } from "@react-three/drei";
+import { useRef } from "react";
 
 function App() {
+  function MovingCamera() {
+    const { camera } = useThree();
+    const cameraRef = useRef(camera);
+
+    useFrame((state) => {
+      const { pointer } = state;
+      cameraRef.current.position.x = pointer.x * 0.3; 
+      cameraRef.current.position.y = pointer.y * 0.3; 
+    });
+
+    return null;
+  }
   return (
-    <Canvas>
-      <ambientLight intensity={Math.PI / 2} />
-      <spotLight
-        position={[10, 10, 10]}
-        angle={0.15}
-        penumbra={1}
-        decay={0}
-        intensity={Math.PI}
-      />
-      <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Box position={[-1.2, 0, 0]} />
-      <Box position={[1.2, 0, 0]} />
-    </Canvas>
+    <div className="w-full h-screen">
+      <Canvas className="bg-gray-900">
+        <OrthographicCamera makeDefault position={[0, 0, 0]} zoom={55} />
+        <MovingCamera />
+
+        <Home />
+      </Canvas>
+    </div>
   );
 }
 

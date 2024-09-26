@@ -1,5 +1,4 @@
-import { Floor } from "@components/Floor";
-import { Grass } from "@components/Floor/Grass";
+import { Terrain } from "@components/Terrain";
 import { OrbitControls } from "@react-three/drei";
 
 export function Home() {
@@ -9,8 +8,7 @@ export function Home() {
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} />
 
-      <Floor />
-      <Grass />
+      <Terrain />
     </>
   );
 }

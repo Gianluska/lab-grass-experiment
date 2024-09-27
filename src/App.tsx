@@ -6,7 +6,7 @@ import "./index.css";
 function App() {
   return (
     <div className="w-full h-screen">
-      <Canvas className="bg-gray-900">
+      <Canvas shadows  className="bg-gray-900">
         <Home />
       </Canvas>
     </div>

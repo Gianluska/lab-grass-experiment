@@ -42,7 +42,7 @@ export function Grass({ options = { bW: 0.12, bH: 1, joints: 5 }, width = 100, i
         <grassMaterial ref={materialRef} map={texture} alphaMap={alphaMap} toneMapped={false} />
       </mesh>
       <mesh position={[0, 0, 0]} geometry={groundGeo}>
-        <meshStandardMaterial color="#000f00" />
+        <meshStandardMaterial color="#201401" />
       </mesh>
     </group>
   )

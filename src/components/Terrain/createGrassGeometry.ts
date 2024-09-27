@@ -1,9 +1,17 @@
-import { InstancedBufferAttribute, InstancedBufferGeometry, MathUtils, PlaneGeometry } from "three";
+import {
+  InstancedBufferAttribute,
+  InstancedBufferGeometry,
+  MathUtils,
+  PlaneGeometry,
+} from "three";
 
 export function createGrassGeometry({
   GRASS_BLADES,
   GRASS_PATCH_SIZE,
-}: {GRASS_BLADES: number, GRASS_PATCH_SIZE: number}): InstancedBufferGeometry {
+}: {
+  GRASS_BLADES: number;
+  GRASS_PATCH_SIZE: number;
+}): InstancedBufferGeometry {
   const bladeWidth = 0.05;
   const bladeHeight = 1;
   const joints = 12;
@@ -18,33 +26,29 @@ export function createGrassGeometry({
     const index2 = index1 + 3;
 
     const y = positionAttribute.getY(index1);
-    const factor = y / bladeHeight; // Fator de altura da lâmina
+    const factor = y / bladeHeight;
 
-    // Curvatura suave ao longo da lâmina
     const curve = Math.sin(factor * Math.PI) * bend;
 
-    // Diminuir a largura da lâmina em direção à ponta
-    const scaleFactor = MathUtils.lerp(1, 0.0, factor); // Largura reduzida a zero na ponta
+    const scaleFactor = MathUtils.lerp(1, 0.0, factor);
 
-    if (i < joints) {
-      // Para todos os segmentos exceto o último, ajustar normalmente
-      positionAttribute.setX(index1, positionAttribute.getX(index1) * scaleFactor + curve);
-      positionAttribute.setX(index2, positionAttribute.getX(index2) * scaleFactor - curve);
+    positionAttribute.setX(
+      index1,
+      positionAttribute.getX(index1) * scaleFactor + curve
+    );
+    positionAttribute.setX(
+      index2,
+      positionAttribute.getX(index2) * scaleFactor - curve
+    );
 
-      // Ajustar a posição ao longo do eixo Z para suavizar a curvatura
-      positionAttribute.setZ(index1, positionAttribute.getZ(index1) + factor * bend);
-      positionAttribute.setZ(index2, positionAttribute.getZ(index2) - factor * bend);
-    } else {
-      // Para o último segmento, definir ambos os vértices na mesma posição
-      const topX = 0.0 + curve;
-      const topZ = 0.0 + factor * bend;
-
-      positionAttribute.setX(index1, topX);
-      positionAttribute.setX(index2, topX);
-
-      positionAttribute.setZ(index1, topZ);
-      positionAttribute.setZ(index2, topZ);
-    }
+    positionAttribute.setZ(
+      index1,
+      positionAttribute.getZ(index1) + factor * bend
+    );
+    positionAttribute.setZ(
+      index2,
+      positionAttribute.getZ(index2) - factor * bend
+    );
   }
 
   positionAttribute.needsUpdate = true;
@@ -82,7 +86,7 @@ export function createGrassGeometry({
     const topVariation = Math.random();
     topColorVariations.push(topVariation);
 
-    const curvature =  0.6 * (Math.random() - 0.6);
+    const curvature = 0.6 * (Math.random() - 0.6);
     curvatures.push(curvature);
   }
 

@@ -24,7 +24,9 @@ export function Terrain() {
   const { scene } = useThree();
 
   // Carregar o normal map
-  const normalMap = useLoader(TextureLoader, "/GRASS_NORMAL.png") as Texture;
+  const normalMap = useLoader(TextureLoader, "/textures/grass/grass_normal.png") as Texture;
+  const alphaMap = useLoader(TextureLoader, "/textures/grass/grass_alpha_map.png") as Texture;
+  const grassTexture = useLoader(TextureLoader, "/textures/grass/grass_texture.png") as Texture;
 
 
   // Configurações de iluminação
@@ -52,6 +54,8 @@ export function Terrain() {
       uniforms: {
         time: { value: 0 },
         normalMap: { value: normalMap },
+        alphaMap: { value: alphaMap },
+        grassTexture: { value: grassTexture },
         windDirection: { value: windDirection },
         ambientLightColor: { value: ambientLightColor },
         lightDirection: { value: lightDirection },
@@ -69,14 +73,14 @@ export function Terrain() {
     return shaderMaterial;
   }, [
     normalMap,
+    alphaMap,
     windDirection,
     ambientLightColor,
     lightDirection,
     lightColor,
     roughness,
     metalness,
-    vertexShader,
-    fragmentShader,
+    grassTexture
   ]);
 
   // Atualizar os uniforms a cada frame

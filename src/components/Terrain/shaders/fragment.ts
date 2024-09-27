@@ -1,5 +1,7 @@
 export const fragmentShader = `
 uniform sampler2D normalMap;
+uniform sampler2D alphaMap;
+uniform sampler2D grassTexture;
 uniform vec3 ambientLightColor;
 uniform vec3 lightDirection;
 uniform vec3 lightColor;
@@ -17,8 +19,6 @@ varying vec3 vViewPosition;
 varying vec4 vShadowCoord;
 
 varying float vColorVariation;
-varying float vBottomColorVariation;
-varying float vTopColorVariation;
 
 float unpackDepth(const in vec4 rgba_depth) {
   const vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
@@ -60,16 +60,9 @@ void main() {
   float bias = 0.005;
   float shadow = currentDepth > shadowDepth + bias ? 0.5 : 1.0;
 
-  vec3 bottomColor = vec3(0.05, 0.3, 0.20);
-  vec3 topColor = vec3(0.45, 0.45, 0.1);
+  vec3 textureColor = texture2D(grassTexture, vUv).rgb;
 
-  bottomColor += (vBottomColorVariation - 0.5) * 0.4;
-  topColor += (vTopColorVariation - 0.5) * 0.4;
-
-  bottomColor = clamp(bottomColor, 0.0, 1.0);
-  topColor = clamp(topColor, 0.0, 1.0);
-
-  vec3 baseColor = mix(bottomColor, topColor, vUv.y);
+  vec3 baseColor = textureColor;
 
   baseColor *= 0.9 + vColorVariation * 0.2;
 
@@ -77,6 +70,10 @@ void main() {
   baseColor *= mix(0.5, 1.0, heightFactor);
 
   vec3 color = baseColor * (ambient + diffuse * shadow) + specular * shadow;
+
+  float alpha = texture2D(alphaMap, vUv).r;
+  float threshold = 0.1;
+  if(alpha < threshold) discard;
 
   gl_FragColor = vec4(color, 1.0);
 }

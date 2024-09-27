@@ -1,3 +1,4 @@
+export const vertexShader = `
 uniform float time;
 uniform vec2 windDirection;
 uniform mat4 shadowMatrix;
@@ -144,3 +145,4 @@ void main() {
 
   gl_Position = projectionMatrix * mvPosition;
 }
+`

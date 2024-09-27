@@ -1,8 +1,8 @@
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";
-import vertexShader from "./shaders/vertex.glsl";
-import fragmentShader from "./shaders/fragment.glsl";
+import { vertexShader } from "./shaders/vertex";
+import { fragmentShader } from "./shaders/fragment";
 
 const GRASS_BLADES = 400000; // Número reduzido para melhor desempenho
 const GRASS_PATCH_SIZE = 100;
@@ -15,12 +15,18 @@ export function Terrain() {
   normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
 
   // Definir a direção do vento
-  const windDirection = useMemo(() => new THREE.Vector2(1.0, 0.0).normalize(), []);
+  const windDirection = useMemo(
+    () => new THREE.Vector2(1.0, 0.0).normalize(),
+    []
+  );
 
   // Definir cores das luzes
   const ambientLightColor = useMemo(() => new THREE.Color(0.2, 0.2, 0.2), []);
   const lightColor = useMemo(() => new THREE.Color(1.0, 1.0, 1.0), []);
-  const lightDirection = useMemo(() => new THREE.Vector3(0.5, 1.0, 0.5).normalize(), []);
+  const lightDirection = useMemo(
+    () => new THREE.Vector3(0.5, 1.0, 0.5).normalize(),
+    []
+  );
 
   // Propriedades do material
   const roughness = useMemo(() => 0.2, []);
@@ -32,7 +38,12 @@ export function Terrain() {
     const bladeHeight = 1;
     const joints = 6;
 
-    const baseGeometry = new THREE.PlaneGeometry(bladeWidth, bladeHeight, 1, joints);
+    const baseGeometry = new THREE.PlaneGeometry(
+      bladeWidth,
+      bladeHeight,
+      1,
+      joints
+    );
     const positionAttribute = baseGeometry.attributes.position;
 
     const bend = 0.01;
@@ -43,8 +54,14 @@ export function Terrain() {
       const y = positionAttribute.getY(index);
       const scaleFactor = 1 - y / bladeHeight;
 
-      positionAttribute.setX(index, positionAttribute.getX(index) * scaleFactor);
-      positionAttribute.setX(index + 1, positionAttribute.getX(index + 1) * scaleFactor);
+      positionAttribute.setX(
+        index,
+        positionAttribute.getX(index) * scaleFactor
+      );
+      positionAttribute.setX(
+        index + 1,
+        positionAttribute.getX(index + 1) * scaleFactor
+      );
 
       const angle = (y / bladeHeight) * bend;
       positionAttribute.setZ(index, Math.sin(angle));
@@ -104,11 +121,17 @@ export function Terrain() {
     );
     instancedGeometry.setAttribute(
       "bottomColorVariation",
-      new THREE.InstancedBufferAttribute(new Float32Array(bottomColorVariations), 1)
+      new THREE.InstancedBufferAttribute(
+        new Float32Array(bottomColorVariations),
+        1
+      )
     );
     instancedGeometry.setAttribute(
       "topColorVariation",
-      new THREE.InstancedBufferAttribute(new Float32Array(topColorVariations), 1)
+      new THREE.InstancedBufferAttribute(
+        new Float32Array(topColorVariations),
+        1
+      )
     );
 
     return instancedGeometry;
@@ -154,7 +177,11 @@ export function Terrain() {
       (child) => child instanceof THREE.DirectionalLight
     ) as THREE.DirectionalLight | undefined;
 
-    if (directionalLight && directionalLight.castShadow && directionalLight.shadow.map) {
+    if (
+      directionalLight &&
+      directionalLight.castShadow &&
+      directionalLight.shadow.map
+    ) {
       // Calcular a shadowMatrix
       const shadowMatrix = new THREE.Matrix4();
       shadowMatrix.multiplyMatrices(

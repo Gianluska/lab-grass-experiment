@@ -6,16 +6,7 @@
         "components/*"
       ]
     },
-    "composite": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./custom.d.ts"
-    ]
   },
-  "include": [
-    "src",
-    "custom.d.ts"
-  ],
   "files": [],
   "references": [
     {

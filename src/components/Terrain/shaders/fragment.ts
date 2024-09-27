@@ -1,3 +1,4 @@
+export const fragmentShader = `
 uniform sampler2D normalMap;
 uniform vec3 ambientLightColor;
 uniform vec3 lightDirection;
@@ -79,3 +80,4 @@ void main() {
 
   gl_FragColor = vec4(color, 1.0);
 }
+`

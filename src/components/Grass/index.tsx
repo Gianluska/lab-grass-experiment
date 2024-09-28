@@ -1,11 +1,11 @@
+import { Color, DoubleSide } from "three";
+import { shaderMaterial } from "@react-three/drei";
+import { extend, useLoader, useFrame } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
+import { PlaneBufferGeometry, TextureLoader } from "three";
 
-import {
-  PlaneBufferGeometry,
-  TextureLoader,
-} from "three";
-import { useFrame, useLoader } from "@react-three/fiber";
-
+import { vertexShader } from "./shaders/vertex";
+import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
 
 import bladeAlpha from "/textures/grass/blade_alpha.jpg";
@@ -13,6 +13,25 @@ import bladeDiffuse from "/textures/grass/blade_diffuse.jpg";
 
 import "./grassMaterial";
 import { Terrain } from "@components/Terrain";
+
+const GrassMaterial = shaderMaterial(
+  {
+    bladeHeight: 1,
+    map: null,
+    alphaMap: null,
+    time: 0,
+    tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
+    bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
+  },
+  vertexShader,
+  fragmentShader,
+  (self) => {
+    if (!self) return;
+    self.side = DoubleSide;
+  },
+);
+
+extend({ GrassMaterial });
 
 export function Grass({
   options = { grassWidth: 0.15, grassHeight: 1, joints: 12 },
@@ -22,7 +41,7 @@ export function Grass({
 }) {
   const { grassWidth, grassHeight, joints } = options;
 
-  const materialRef = useRef();
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   const [texture, alphaMap] = useLoader(TextureLoader, [
     bladeDiffuse,
@@ -76,6 +95,10 @@ export function Grass({
           <instancedBufferAttribute
             attach="attributes-halfRootAngleCos"
             args={[new Float32Array(attributeData.halfRootAngleCos), 1]}
+          />
+          <instancedBufferAttribute
+            attach="attributes-colorVariation"
+            args={[new Float32Array(attributeData.colorVariations), 1]}
           />
         </instancedBufferGeometry>
 

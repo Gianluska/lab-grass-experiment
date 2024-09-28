@@ -1,18 +1,34 @@
 import { Grass } from "@components/Grass";
-import { OrbitControls, Sky, Stats } from "@react-three/drei";
+import { OrbitControls, Stars } from "@react-three/drei";
 import { Suspense } from "react";
 
 export function Home() {
   return (
     <>
-      <Sky />
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
+      <Stars
+        radius={300}
+        depth={60}
+        count={20000} 
+        factor={7}
+        saturation={0} 
+        fade 
+      />
+      
+      <ambientLight intensity={0.2} color="#ffffff" />
+      
+      <directionalLight
+        position={[50, 100, 50]}
+        intensity={0.8}
+        color="#a0c4ff"
+        castShadow
+      />
+
       <Suspense fallback={null}>
         <Grass />
-        {/* <Terrain /> */}
       </Suspense>
+      
       <Stats />
+      
       <OrbitControls />
     </>
   );

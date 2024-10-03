@@ -10,16 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-three/drei": "9.7.1",
-    "@react-three/fiber": "8.0.13",
-    "@react-three/postprocessing": "^2.16.2",
-    "@types/three": "0.140.0",
+    "@react-three/drei": "^9.114.0",
+    "@react-three/fiber": "^8.17.9",
+    "@react-three/postprocessing": "^2.16.3",
+    "@types/three": "^0.169.0",
     "@wyw-in-js/babel-preset": "^0.5.4",
     "postprocessing": "^6.36.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "simplex-noise": "3.0.1",
-    "three": "0.140.0"
+    "three": "^0.169.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

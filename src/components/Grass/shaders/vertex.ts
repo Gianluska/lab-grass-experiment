@@ -4,8 +4,6 @@ export const vertexShader = `
   precision mediump float;
 attribute vec3 offset;
 attribute vec4 orientation;
-attribute float halfRootAngleSin;
-attribute float halfRootAngleCos;
 attribute float stretch;
 attribute float colorVariation;
 uniform float time;
@@ -54,7 +52,7 @@ void main() {
     time - offset.z / 50.0
   ));
 
-  vec4 direction = vec4(0.0, halfRootAngleSin, 0.0, halfRootAngleCos);
+  vec4 direction = vec4(0.0, 0.0, 0.0, 0.0);
   direction = slerp(direction, orientation, frc);
 
   vec3 vPosition = vec3(

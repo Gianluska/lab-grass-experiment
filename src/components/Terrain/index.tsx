@@ -1,33 +1,29 @@
-
 import { useMemo } from "react";
-
-import { DoubleSide, PlaneGeometry, Vector3 } from "three";
-import { Geometry } from "three/examples/jsm/deprecated/Geometry";
-
+import { DoubleSide, PlaneGeometry } from "three";
 import { getYPosition } from "utils/simpleNoise";
 
-export function Terrain({width = 30}) {
+export function Terrain({ width = 30 }) {
   const groundGeo = useMemo(() => {
-    const geo = new Geometry().fromBufferGeometry(
-      new PlaneGeometry(width, width, 32, 32)
-    );
+    const geo = new PlaneGeometry(width, width, 32, 32);
+    geo.rotateX(-Math.PI / 2);
 
-    geo.verticesNeedUpdate = true;
-    geo.lookAt(new Vector3(0, 1, 0));
+    const positions = geo.attributes.position.array;
 
-    for (let i = 0; i < geo.vertices.length; i++) {
-      const v = geo.vertices[i];
-      v.y = getYPosition(v.x, v.z);
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const z = positions[i + 2];
+      const y = getYPosition(x, z);
+      positions[i + 1] = y;
     }
 
     geo.computeVertexNormals();
-    
-    return geo.toBufferGeometry();
+
+    return geo;
   }, [width]);
-  
+
   return (
-    <mesh position={[0, 0, 0]} geometry={groundGeo}>
-    <meshStandardMaterial side={DoubleSide} color="#201401" />
-  </mesh>
+    <mesh geometry={groundGeo}>
+      <meshStandardMaterial side={DoubleSide} color="#201401" />
+    </mesh>
   );
 }

@@ -1,8 +1,7 @@
-import { Color, DoubleSide } from "three";
+import { Color, DoubleSide, PlaneGeometry, TextureLoader, type ShaderMaterial } from "three";
 import { shaderMaterial } from "@react-three/drei";
 import { extend, useLoader, useFrame } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
-import { PlaneBufferGeometry, TextureLoader } from "three";
 
 import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
@@ -28,7 +27,7 @@ const GrassMaterial = shaderMaterial(
   (self) => {
     if (!self) return;
     self.side = DoubleSide;
-  },
+  }
 );
 
 extend({ GrassMaterial });
@@ -41,7 +40,7 @@ export function Grass({
 }) {
   const { grassWidth, grassHeight, joints } = options;
 
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const materialRef = useRef<ShaderMaterial>();
 
   const [texture, alphaMap] = useLoader(TextureLoader, [
     bladeDiffuse,
@@ -55,7 +54,7 @@ export function Grass({
 
   const baseGeom = useMemo(
     () =>
-      new PlaneBufferGeometry(grassWidth, grassHeight, 1, joints).translate(
+      new PlaneGeometry(grassWidth, grassHeight, 1, joints).translate(
         0,
         grassHeight / 2,
         0
@@ -64,8 +63,9 @@ export function Grass({
   );
 
   useFrame((state) => {
-    if (!materialRef.current) return;
-    materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4;
+    if (materialRef.current) {
+      materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4;
+    }
   });
 
   return (
@@ -73,8 +73,7 @@ export function Grass({
       <mesh>
         <instancedBufferGeometry
           index={baseGeom.index}
-          attributes-position={baseGeom.attributes.position}
-          attributes-uv={baseGeom.attributes.uv}
+          attributes={baseGeom.attributes}
         >
           <instancedBufferAttribute
             attach="attributes-offset"
@@ -87,14 +86,6 @@ export function Grass({
           <instancedBufferAttribute
             attach="attributes-stretch"
             args={[new Float32Array(attributeData.stretches), 1]}
-          />
-          <instancedBufferAttribute
-            attach="attributes-halfRootAngleSin"
-            args={[new Float32Array(attributeData.halfRootAngleSin), 1]}
-          />
-          <instancedBufferAttribute
-            attach="attributes-halfRootAngleCos"
-            args={[new Float32Array(attributeData.halfRootAngleCos), 1]}
           />
           <instancedBufferAttribute
             attach="attributes-colorVariation"

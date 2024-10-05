@@ -7,8 +7,8 @@ import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
 
-import bladeAlpha from "/textures/grass/blade_alpha.jpg";
-import bladeDiffuse from "/textures/grass/blade_diffuse.jpg";
+import bladeAlpha from "/textures/grass/alpha_map.jpg";
+import bladeDiffuse from "/textures/grass/texture.jpg";
 
 import "./grassMaterial";
 import { Terrain } from "@components/Terrain";

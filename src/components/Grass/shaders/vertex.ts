@@ -62,7 +62,7 @@ void main() {
   );
   vPosition = rotateVectorByQuaternion(vPosition, direction);
 
-  float halfAngle = noise * 0.15 * frc;
+  float halfAngle = noise * 0.25 * frc;
   vec4 windQuaternion = normalize(vec4(
     sin(halfAngle),
     0.0,

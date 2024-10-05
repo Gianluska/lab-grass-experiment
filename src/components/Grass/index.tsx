@@ -33,9 +33,9 @@ const GrassMaterial = shaderMaterial(
 extend({ GrassMaterial });
 
 export function Grass({
-  options = { grassWidth: 0.15, grassHeight: 1, joints: 12 },
+  options = { grassWidth: 0.25, grassHeight: 1, joints: 12 },
   width = 200,
-  instances = 300000,
+  instances = 400000,
   ...props
 }) {
   const { grassWidth, grassHeight, joints } = options;

@@ -4,10 +4,15 @@ import {
   PlaneGeometry,
   TextureLoader,
   ShaderMaterial,
+  RepeatWrapping,
+  Vector3,
+  Raycaster,
+  Vector2,
+  Plane,
 } from "three";
 import { shaderMaterial } from "@react-three/drei";
-import { extend, useLoader, useFrame } from "@react-three/fiber";
-import { useRef, useMemo } from "react";
+import { extend, useLoader, useFrame, useThree } from "@react-three/fiber";
+import { useRef, useMemo, useState, useEffect } from "react";
 
 import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
@@ -34,6 +39,7 @@ import translucencyMap2 from "/textures/grass/translucency/translucency_02.jpg";
 import translucencyMap3 from "/textures/grass/translucency/translucency_03.jpg";
 
 import { Terrain } from "@components/Terrain";
+import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
 
 const GrassMaterial = shaderMaterial(
   {
@@ -57,6 +63,7 @@ const GrassMaterial = shaderMaterial(
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
+    mousePosition: new Vector3(0, 0, 0),
   },
   vertexShader,
   fragmentShader,
@@ -68,12 +75,18 @@ const GrassMaterial = shaderMaterial(
 
 extend({ GrassMaterial });
 
+
 export function Grass({
   options = { grassWidth: 0.55, grassHeight: 1, joints: 2 },
   width = 100,
   instances = 100000,
   ...props
 }) {
+  const { camera, scene, size } = useThree();
+  const [mousePosition, setMousePosition] = useState(new Vector3(0, 0, 0));
+  const raycaster = new Raycaster();
+  const mouse = new Vector2();
+  
   const { grassWidth, grassHeight, joints } = options;
 
   const materialRef = useRef<ShaderMaterial>();
@@ -101,12 +114,27 @@ export function Grass({
     roughnessMap2,
     roughnessMap3,
   ]);
-  
-  const [translucency1, translucency2, translucency3] = useLoader(TextureLoader, [
-    translucencyMap1,
-    translucencyMap2,
-    translucencyMap3,
-  ]);
+
+  const [translucency1, translucency2, translucency3] = useLoader(
+    TextureLoader,
+    [translucencyMap1, translucencyMap2, translucencyMap3]
+  );
+
+  [texture1, texture2, texture3].forEach((texture) => {
+    texture.encoding = sRGBEncoding; // Define a codificação para sRGB
+    texture.wrapS = texture.wrapT = RepeatWrapping;
+  });
+
+  [
+    roughness1,
+    roughness2,
+    roughness3,
+    translucency1,
+    translucency2,
+    translucency3,
+  ].forEach((texture) => {
+    texture.wrapS = texture.wrapT = RepeatWrapping;
+  });
 
   const attributeData = useMemo(
     () => createGrassGeometry(instances, width),
@@ -126,8 +154,33 @@ export function Grass({
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4;
+      materialRef.current.uniforms.mousePosition.value.copy(mousePosition);
     }
   });
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      // Converte a posição do mouse para valores normalizados entre -1 e 1
+      mouse.x = (event.clientX / size.width) * 2 - 1;
+      mouse.y = -(event.clientY / size.height) * 2 + 1;
+
+      // Atualiza o raycaster
+      raycaster.setFromCamera(mouse, camera);
+
+      // Define um plano no eixo XZ (y = 0)
+      const planeNormal = new Vector3(0, 1, 0);
+      const plane = new Plane(planeNormal, 0);
+
+      // Calcula o ponto de interseção do raio com o plano
+      const intersectionPoint = new Vector3();
+      raycaster.ray.intersectPlane(plane, intersectionPoint);
+
+      setMousePosition(intersectionPoint);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [camera, size]);
 
   return (
     <group {...props}>
@@ -177,7 +230,7 @@ export function Grass({
           translucencyMap2={translucency2}
           translucencyMap3={translucency3}
           cameraAlignmentFactor={0.5}
-          toneMapped={false}
+          mousePosition={mousePosition}
         />
       </mesh>
       <Terrain width={width} />

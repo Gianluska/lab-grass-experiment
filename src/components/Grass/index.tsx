@@ -53,6 +53,7 @@ const GrassMaterial = shaderMaterial(
     translucencyMap1: null,
     translucencyMap2: null,
     translucencyMap3: null,
+    cameraAlignmentFactor: 0.5,
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
@@ -70,7 +71,7 @@ extend({ GrassMaterial });
 export function Grass({
   options = { grassWidth: 0.55, grassHeight: 1, joints: 2 },
   width = 100,
-  instances = 170000,
+  instances = 100000,
   ...props
 }) {
   const { grassWidth, grassHeight, joints } = options;
@@ -175,6 +176,7 @@ export function Grass({
           translucencyMap1={translucency1}
           translucencyMap2={translucency2}
           translucencyMap3={translucency3}
+          cameraAlignmentFactor={0.5}
           toneMapped={false}
         />
       </mesh>

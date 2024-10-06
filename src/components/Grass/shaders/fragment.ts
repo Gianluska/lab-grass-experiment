@@ -66,8 +66,9 @@ void main() {
 
   vec3 finalNormal = normalize(TBN * tangentNormal);
 
-  vec3 lightDir = normalize(vec3(0.5, 1.0, 0.5));
-  float lightIntensity = 0.8; // 80% da intensidade
+  vec3 lightDir = normalize(vec3(-0.3, -1.0, -0.3));
+  vec3 lightColor = vec3(0.5, 0.5, 0.7); 
+  float lightIntensity = 40.0;
 
   vec3 viewDir = normalize(-vPosition);
 
@@ -76,11 +77,13 @@ void main() {
 
   vec3 halfVector = normalize(lightDir + viewDir);
   float NdotH = max(dot(finalNormal, halfVector), 0.0);
-  float adjustedRoughness = pow(roughness, 1.2); // Aplica uma raiz quadrada
+  float adjustedRoughness = pow(roughness, 1.2);
   float specPower = mix(100.0, 1.0, adjustedRoughness);
-  float spec = pow(NdotH, specPower);
+  float spec = pow(NdotH, specPower) * 0.1;
+  spec *= lightIntensity;
 
   float translucencyFactor = translucency * max(dot(-lightDir, finalNormal), 0.0);
+  translucencyFactor *= 0.2 * lightIntensity;
 
   vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
   vec3 adjustedBottomColor = bottomColor * (1.0 + vColorVariation);
@@ -88,10 +91,13 @@ void main() {
   vec3 baseColor = mix(adjustedTipColor, col.rgb, frc);
   baseColor = mix(adjustedBottomColor, baseColor, frc);
 
-  vec3 finalColor = baseColor * diff + vec3(1.0) * spec * 0.1;
+  vec3 finalColor = baseColor * diff * lightColor + spec * lightColor;
 
-  finalColor += baseColor * translucencyFactor * 0.2;
+  finalColor += baseColor * translucencyFactor * lightColor;
+
+  finalColor = clamp(finalColor, 0.0, 1.0);
 
   gl_FragColor = vec4(finalColor, 1.0);
 }
+
 `

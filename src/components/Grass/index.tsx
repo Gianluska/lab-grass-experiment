@@ -82,10 +82,8 @@ export function Grass({
   instances = 100000,
   ...props
 }) {
-  const { camera, scene, size } = useThree();
+  const { camera, size } = useThree();
   const [mousePosition, setMousePosition] = useState(new Vector3(0, 0, 0));
-  const raycaster = new Raycaster();
-  const mouse = new Vector2();
   
   const { grassWidth, grassHeight, joints } = options;
 
@@ -121,7 +119,8 @@ export function Grass({
   );
 
   [texture1, texture2, texture3].forEach((texture) => {
-    texture.encoding = sRGBEncoding; // Define a codificação para sRGB
+    // @ts-expect-error - Encoding is deprecated
+    texture.encoding = sRGBEncoding;
     texture.wrapS = texture.wrapT = RepeatWrapping;
   });
 
@@ -159,19 +158,18 @@ export function Grass({
   });
 
   useEffect(() => {
-    const handleMouseMove = (event) => {
-      // Converte a posição do mouse para valores normalizados entre -1 e 1
+    const raycaster = new Raycaster();
+    const mouse = new Vector2();
+
+    const handleMouseMove = (event: MouseEvent) => {
       mouse.x = (event.clientX / size.width) * 2 - 1;
       mouse.y = -(event.clientY / size.height) * 2 + 1;
 
-      // Atualiza o raycaster
       raycaster.setFromCamera(mouse, camera);
 
-      // Define um plano no eixo XZ (y = 0)
       const planeNormal = new Vector3(0, 1, 0);
       const plane = new Plane(planeNormal, 0);
 
-      // Calcula o ponto de interseção do raio com o plano
       const intersectionPoint = new Vector3();
       raycaster.ray.intersectPlane(plane, intersectionPoint);
 

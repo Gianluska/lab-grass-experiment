@@ -1,16 +1,20 @@
 import { perlinNoise } from "./perlinNoise";
 
 export const vertexShader = `
-  precision mediump float;
+precision mediump float;
+
 attribute vec3 offset;
 attribute vec4 orientation;
 attribute float stretch;
 attribute float colorVariation;
+attribute float textureIndex;
+
 uniform float time;
 uniform float bladeHeight;
 varying vec2 vUv;
 varying float frc;
 varying float vColorVariation;
+varying float vTextureIndex;
 
 ${perlinNoise}
 
@@ -70,6 +74,8 @@ void main() {
     cos(halfAngle)
   ));
   vPosition = rotateVectorByQuaternion(vPosition, windQuaternion);
+
+  vTextureIndex = textureIndex / 3.0; // Normaliza para [0,1]
 
   vUv = uv;
   vColorVariation = colorVariation;

@@ -1,24 +1,36 @@
 export const fragmentShader = `
 precision mediump float;
 
-uniform sampler2D map;
-uniform sampler2D alphaMap;
+uniform sampler2D map1;
+uniform sampler2D map2;
+uniform sampler2D map3;
+uniform sampler2D alphaMap1;
+uniform sampler2D alphaMap2;
+uniform sampler2D alphaMap3;
 uniform vec3 tipColor;
 uniform vec3 bottomColor;
 
 varying vec2 vUv;
 varying float frc;
 varying float vColorVariation;
-
-// Remova todos os #include problemáticos
-// #include <common> pode ser mantido se necessário, mas vamos removê-lo por segurança
+varying float vTextureIndex;
 
 void main() {
-  float alpha = texture2D(alphaMap, vUv).r;
-  if(alpha < 0.15) discard;
+  vec4 col;
+  float alpha;
 
-  // Obter dados de cor da textura
-  vec4 col = texture2D(map, vUv);
+  if (vTextureIndex < 0.3333) {
+    col = texture2D(map1, vUv);
+    alpha = texture2D(alphaMap1, vUv).r;
+  } else if (vTextureIndex < 0.6666) {
+    col = texture2D(map2, vUv);
+    alpha = texture2D(alphaMap2, vUv).r;
+  } else {
+    col = texture2D(map3, vUv);
+    alpha = texture2D(alphaMap3, vUv).r;
+  }
+
+  if (alpha < 0.15) discard;
 
   // Ajustar as cores com variação
   vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
@@ -30,9 +42,8 @@ void main() {
   // Adicionar uma sombra em direção à raiz com variação
   col.rgb = mix(adjustedBottomColor, col.rgb, frc);
 
-  // Não aplicamos toneMapping() ou linearToOutputTexel() aqui
-  // Saída da cor final
   gl_FragColor = col;
 }
+
 
 `

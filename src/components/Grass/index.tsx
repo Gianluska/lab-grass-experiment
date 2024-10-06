@@ -1,4 +1,4 @@
-import { Color, DoubleSide, PlaneGeometry, TextureLoader, type ShaderMaterial } from "three";
+import { Color, DoubleSide, PlaneGeometry, TextureLoader, ShaderMaterial } from "three";
 import { shaderMaterial } from "@react-three/drei";
 import { extend, useLoader, useFrame } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
@@ -7,17 +7,25 @@ import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
 
-import bladeAlpha from "/textures/grass/alpha_map.jpg";
-import bladeDiffuse from "/textures/grass/texture.jpg";
+import grassTexture1 from "/textures/grass/teste/texture_01.jpg";
+import grassTexture2 from "/textures/grass/teste/texture_02.jpg";
+import grassTexture3 from "/textures/grass/teste/texture_03.jpg";
 
-import "./grassMaterial";
+import grassAlpha1 from "/textures/grass/teste/alpha_01.jpg";
+import grassAlpha2 from "/textures/grass/teste/alpha_02.jpg";
+import grassAlpha3 from "/textures/grass/teste/alpha_03.jpg";
+
 import { Terrain } from "@components/Terrain";
 
 const GrassMaterial = shaderMaterial(
   {
     bladeHeight: 1,
-    map: null,
-    alphaMap: null,
+    map1: null,
+    map2: null,
+    map3: null,
+    alphaMap1: null,
+    alphaMap2: null,
+    alphaMap3: null,
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
@@ -33,18 +41,25 @@ const GrassMaterial = shaderMaterial(
 extend({ GrassMaterial });
 
 export function Grass({
-  options = { grassWidth: 0.25, grassHeight: 1, joints: 12 },
-  width = 200,
-  instances = 400000,
+  options = { grassWidth: 0.55, grassHeight: 1, joints: 12 },
+  width = 100,
+  instances = 200000,
   ...props
 }) {
   const { grassWidth, grassHeight, joints } = options;
 
   const materialRef = useRef<ShaderMaterial>();
 
-  const [texture, alphaMap] = useLoader(TextureLoader, [
-    bladeDiffuse,
-    bladeAlpha,
+  const [texture1, texture2, texture3] = useLoader(TextureLoader, [
+    grassTexture1,
+    grassTexture2,
+    grassTexture3,
+  ]);
+
+  const [alphaMap1, alphaMap2, alphaMap3] = useLoader(TextureLoader, [
+    grassAlpha1,
+    grassAlpha2,
+    grassAlpha3,
   ]);
 
   const attributeData = useMemo(
@@ -91,13 +106,21 @@ export function Grass({
             attach="attributes-colorVariation"
             args={[new Float32Array(attributeData.colorVariations), 1]}
           />
+          <instancedBufferAttribute
+            attach="attributes-textureIndex"
+            args={[new Float32Array(attributeData.textureIndices), 1]}
+          />
         </instancedBufferGeometry>
 
         {/* @ts-expect-error - Custom grassMaterial */}
         <grassMaterial
           ref={materialRef}
-          map={texture}
-          alphaMap={alphaMap}
+          map1={texture1}
+          map2={texture2}
+          map3={texture3}
+          alphaMap1={alphaMap1}
+          alphaMap2={alphaMap2}
+          alphaMap3={alphaMap3}
           toneMapped={false}
         />
       </mesh>

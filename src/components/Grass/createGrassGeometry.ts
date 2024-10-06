@@ -1,4 +1,6 @@
-import {  Quaternion, Euler } from "three";
+// createGrassGeometry.ts
+
+import { Quaternion, Euler } from "three";
 import { getYPosition } from "utils/simpleNoise";
 
 export function createGrassGeometry(instances: number, width: number) {
@@ -6,6 +8,7 @@ export function createGrassGeometry(instances: number, width: number) {
   const orientations = [];
   const stretches = [];
   const colorVariations = [];
+  const textureIndices = [];
 
   for (let i = 0; i < instances; i++) {
     const offsetX = Math.random() * width - width / 2;
@@ -14,23 +17,28 @@ export function createGrassGeometry(instances: number, width: number) {
     offsets.push(offsetX, offsetY, offsetZ);
 
     const yaw = Math.random() * 2 * Math.PI;
-
     const pitch = (Math.random() - 0.5) * 0.5;
     const roll = (Math.random() - 0.5) * 0.7;
 
     const quaternion = new Quaternion();
     quaternion.setFromEuler(new Euler(pitch, yaw, roll));
-
     orientations.push(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 
-    if (i < instances / 3) {
-      stretches.push(Math.random() * 1.8);
-    } else {
-      stretches.push(Math.random());
-    }
+    stretches.push(Math.random());
 
     const variation = (Math.random() - 0.5) * 2.5;
     colorVariations.push(variation);
+
+    const rnd = Math.random();
+    let textureIndex;
+    if (rnd < 0.005) {
+      textureIndex = 0;
+    } else if (rnd < 0.99) {
+      textureIndex = 1;
+    } else {
+      textureIndex = 2;
+    }
+    textureIndices.push(textureIndex);
   }
 
   return {
@@ -38,5 +46,6 @@ export function createGrassGeometry(instances: number, width: number) {
     orientations,
     stretches,
     colorVariations,
+    textureIndices,
   };
 }

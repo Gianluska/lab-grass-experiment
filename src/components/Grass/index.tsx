@@ -1,4 +1,10 @@
-import { Color, DoubleSide, PlaneGeometry, TextureLoader, ShaderMaterial } from "three";
+import {
+  Color,
+  DoubleSide,
+  PlaneGeometry,
+  TextureLoader,
+  ShaderMaterial,
+} from "three";
 import { shaderMaterial } from "@react-three/drei";
 import { extend, useLoader, useFrame } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
@@ -7,13 +13,25 @@ import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
 
-import grassTexture1 from "/textures/grass/teste/texture_01.jpg";
-import grassTexture2 from "/textures/grass/teste/texture_02.jpg";
-import grassTexture3 from "/textures/grass/teste/texture_03.jpg";
+import grassTexture1 from "/textures/grass/albedo/texture_01.jpg";
+import grassTexture2 from "/textures/grass/albedo/texture_02.jpg";
+import grassTexture3 from "/textures/grass/albedo/texture_03.jpg";
 
-import grassAlpha1 from "/textures/grass/teste/alpha_01.jpg";
-import grassAlpha2 from "/textures/grass/teste/alpha_02.jpg";
-import grassAlpha3 from "/textures/grass/teste/alpha_03.jpg";
+import grassAlpha1 from "/textures/grass/alpha/alpha_01.jpg";
+import grassAlpha2 from "/textures/grass/alpha/alpha_02.jpg";
+import grassAlpha3 from "/textures/grass/alpha/alpha_03.jpg";
+
+import normalMap1 from "/textures/grass/normal/normal_01.jpg";
+import normalMap2 from "/textures/grass/normal/normal_02.jpg";
+import normalMap3 from "/textures/grass/normal/normal_03.jpg";
+
+import roughnessMap1 from "/textures/grass/roughness/roughness_01.jpg";
+import roughnessMap2 from "/textures/grass/roughness/roughness_02.jpg";
+import roughnessMap3 from "/textures/grass/roughness/roughness_03.jpg";
+
+import translucencyMap1 from "/textures/grass/translucency/translucency_01.jpg";
+import translucencyMap2 from "/textures/grass/translucency/translucency_02.jpg";
+import translucencyMap3 from "/textures/grass/translucency/translucency_03.jpg";
 
 import { Terrain } from "@components/Terrain";
 
@@ -26,6 +44,15 @@ const GrassMaterial = shaderMaterial(
     alphaMap1: null,
     alphaMap2: null,
     alphaMap3: null,
+    normalMap1: null,
+    normalMap2: null,
+    normalMap3: null,
+    roughnessMap1: null,
+    roughnessMap2: null,
+    roughnessMap3: null,
+    translucencyMap1: null,
+    translucencyMap2: null,
+    translucencyMap3: null,
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
@@ -41,9 +68,9 @@ const GrassMaterial = shaderMaterial(
 extend({ GrassMaterial });
 
 export function Grass({
-  options = { grassWidth: 0.55, grassHeight: 1, joints: 12 },
+  options = { grassWidth: 0.55, grassHeight: 1, joints: 2 },
   width = 100,
-  instances = 200000,
+  instances = 170000,
   ...props
 }) {
   const { grassWidth, grassHeight, joints } = options;
@@ -60,6 +87,24 @@ export function Grass({
     grassAlpha1,
     grassAlpha2,
     grassAlpha3,
+  ]);
+
+  const [normal1, normal2, normal3] = useLoader(TextureLoader, [
+    normalMap1,
+    normalMap2,
+    normalMap3,
+  ]);
+
+  const [roughness1, roughness2, roughness3] = useLoader(TextureLoader, [
+    roughnessMap1,
+    roughnessMap2,
+    roughnessMap3,
+  ]);
+  
+  const [translucency1, translucency2, translucency3] = useLoader(TextureLoader, [
+    translucencyMap1,
+    translucencyMap2,
+    translucencyMap3,
   ]);
 
   const attributeData = useMemo(
@@ -121,6 +166,15 @@ export function Grass({
           alphaMap1={alphaMap1}
           alphaMap2={alphaMap2}
           alphaMap3={alphaMap3}
+          normalMap1={normal1}
+          normalMap2={normal2}
+          normalMap3={normal3}
+          roughnessMap1={roughness1}
+          roughnessMap2={roughness2}
+          roughnessMap3={roughness3}
+          translucencyMap1={translucency1}
+          translucencyMap2={translucency2}
+          translucencyMap3={translucency3}
           toneMapped={false}
         />
       </mesh>

@@ -22,7 +22,7 @@ varying float vTextureIndex;
 varying vec3 vNormal;
 varying vec3 vPosition;
 
-const float PI = 3.14159265358979323846264;
+const float PI = 3.14159265358979323812312346264;
 
 ${perlinNoise}
 
@@ -43,7 +43,7 @@ vec4 slerp(vec4 v0, vec4 v1, float t) {
 
     const float DOT_THRESHOLD = 0.9995;
     if (dot_ > DOT_THRESHOLD) {
-        vec4 result = v0 + t * (v1 - v0);
+        vec4 result = v3 + t * (v1 - v0);
         normalize(result);
         return result;
     }

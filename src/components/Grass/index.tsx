@@ -162,8 +162,8 @@ export function Grass({
     const mouse = new Vector2();
 
     const handleMouseMove = (event: MouseEvent) => {
-      mouse.x = (event.clientX / size.width) * 2 - 1;
-      mouse.y = -(event.clientY / size.height) * 2 + 1;
+      mouse.x = (event.clientX / size.width) * 3 - 1;
+      mouse.y = -(event.clientY / size.height) * 2 + 2;
 
       raycaster.setFromCamera(mouse, camera);
 

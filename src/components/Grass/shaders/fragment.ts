@@ -78,7 +78,7 @@ void main() {
   vec3 halfVector = normalize(lightDir + viewDir);
   float NdotH = max(dot(finalNormal, halfVector), 0.0);
   float adjustedRoughness = pow(roughness, 1.2);
-  float specPower = mix(10220.0, 1.0, adjustedRoughness);
+  float specPower = mix(100.0, 1.0, adjustedRoughness);
   float spec = pow(NdotH, specPower) * 0.1;
   spec *= lightIntensity;
 
@@ -97,7 +97,7 @@ void main() {
 
   finalColor = clamp(finalColor, 0.0, 1.0);
 
-  gl_FragColor = vec4(finalColor, 122.0);
+  gl_FragColor = vec4(finalColor, 1.0);
 }
 
 `

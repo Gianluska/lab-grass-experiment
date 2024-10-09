@@ -22,7 +22,7 @@ varying float vTextureIndex;
 varying vec3 vNormal;
 varying vec3 vPosition;
 
-const float PI = 3.1415926535897931231223846264;
+const float PI = 3.14159265358979323846264;
 
 ${perlinNoise}
 

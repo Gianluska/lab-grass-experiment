@@ -26,18 +26,6 @@ import grassAlpha1 from "/textures/grass/alpha/alpha_01.jpg";
 import grassAlpha2 from "/textures/grass/alpha/alpha_02.jpg";
 import grassAlpha3 from "/textures/grass/alpha/alpha_03.jpg";
 
-import normalMap1 from "/textures/grass/normal/normal_01.jpg";
-import normalMap2 from "/textures/grass/normal/normal_02.jpg";
-import normalMap3 from "/textures/grass/normal/normal_03.jpg";
-
-import roughnessMap1 from "/textures/grass/roughness/roughness_01.jpg";
-import roughnessMap2 from "/textures/grass/roughness/roughness_02.jpg";
-import roughnessMap3 from "/textures/grass/roughness/roughness_03.jpg";
-
-import translucencyMap1 from "/textures/grass/translucency/translucency_01.jpg";
-import translucencyMap2 from "/textures/grass/translucency/translucency_02.jpg";
-import translucencyMap3 from "/textures/grass/translucency/translucency_03.jpg";
-
 import { Terrain } from "@components/Terrain";
 import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
 
@@ -50,16 +38,6 @@ const GrassMaterial = shaderMaterial(
     alphaMap1: null,
     alphaMap2: null,
     alphaMap3: null,
-    normalMap1: null,
-    normalMap2: null,
-    normalMap3: null,
-    roughnessMap1: null,
-    roughnessMap2: null,
-    roughnessMap3: null,
-    translucencyMap1: null,
-    translucencyMap2: null,
-    translucencyMap3: null,
-    cameraAlignmentFactor: 0.5,
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
@@ -101,37 +79,9 @@ export function Grass({
     grassAlpha3,
   ]);
 
-  const [normal1, normal2, normal3] = useLoader(TextureLoader, [
-    normalMap1,
-    normalMap2,
-    normalMap3,
-  ]);
-
-  const [roughness1, roughness2, roughness3] = useLoader(TextureLoader, [
-    roughnessMap1,
-    roughnessMap2,
-    roughnessMap3,
-  ]);
-
-  const [translucency1, translucency2, translucency3] = useLoader(
-    TextureLoader,
-    [translucencyMap1, translucencyMap2, translucencyMap3]
-  );
-
   [texture1, texture2, texture3].forEach((texture) => {
     // @ts-expect-error - Encoding is deprecated
     texture.encoding = sRGBEncoding;
-    texture.wrapS = texture.wrapT = RepeatWrapping;
-  });
-
-  [
-    roughness1,
-    roughness2,
-    roughness3,
-    translucency1,
-    translucency2,
-    translucency3,
-  ].forEach((texture) => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
   });
 
@@ -218,16 +168,6 @@ export function Grass({
           alphaMap1={alphaMap1}
           alphaMap2={alphaMap2}
           alphaMap3={alphaMap3}
-          normalMap1={normal1}
-          normalMap2={normal2}
-          normalMap3={normal3}
-          roughnessMap1={roughness1}
-          roughnessMap2={roughness2}
-          roughnessMap3={roughness3}
-          translucencyMap1={translucency1}
-          translucencyMap2={translucency2}
-          translucencyMap3={translucency3}
-          cameraAlignmentFactor={0.5}
           mousePosition={mousePosition}
         />
       </mesh>

@@ -38,21 +38,12 @@ void main() {
   if (vTextureIndex < 0.3333) {
     col = texture2D(map1, vUv);
     alpha = texture2D(alphaMap1, vUv).r;
-    normalMap = texture2D(normalMap1, vUv).rgb;
-    roughness = texture2D(roughnessMap1, vUv).r;
-    translucency = texture2D(translucencyMap1, vUv).r;
   } else if (vTextureIndex < 0.6666) {
     col = texture2D(map2, vUv);
     alpha = texture2D(alphaMap2, vUv).r;
-    normalMap = texture2D(normalMap2, vUv).rgb;
-    roughness = texture2D(roughnessMap2, vUv).r;
-    translucency = texture2D(translucencyMap2, vUv).r;
   } else {
     col = texture2D(map3, vUv);
     alpha = texture2D(alphaMap3, vUv).r;
-    normalMap = texture2D(normalMap3, vUv).rgb;
-    roughness = texture2D(roughnessMap3, vUv).r;
-    translucency = texture2D(translucencyMap3, vUv).r;
   }
 
   if (alpha < 0.15) discard;
@@ -60,7 +51,7 @@ void main() {
   vec3 tangentNormal = normalize(normalMap * 2.0 - 1.0);
 
   vec3 N = normalize(vNormal);
-  vec3 T = normalize(vec3(1.0, 0.0, 0.0)); // Supondo tangente em X
+  vec3 T = normalize(vec3(1.0, 0.0, 0.0));
   vec3 B = normalize(cross(N, T));
   mat3 TBN = mat3(T, B, N);
 
@@ -68,22 +59,7 @@ void main() {
 
   vec3 lightDir = normalize(vec3(-0.3, -1.0, -0.3));
   vec3 lightColor = vec3(0.5, 0.5, 0.7); 
-  float lightIntensity = 40.0;
-
-  vec3 viewDir = normalize(-vPosition);
-
-  float diff = max(dot(finalNormal, lightDir), 0.0) * 0.7;
-  diff *= lightIntensity;
-
-  vec3 halfVector = normalize(lightDir + viewDir);
-  float NdotH = max(dot(finalNormal, halfVector), 0.0);
-  float adjustedRoughness = pow(roughness, 1.2);
-  float specPower = mix(100.0, 1.0, adjustedRoughness);
-  float spec = pow(NdotH, specPower) * 0.1;
-  spec *= lightIntensity;
-
-  float translucencyFactor = translucency * max(dot(-lightDir, finalNormal), 0.0);
-  translucencyFactor *= 0.2 * lightIntensity;
+  float lightIntensity = 5.0;
 
   vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
   vec3 adjustedBottomColor = bottomColor * (1.0 + vColorVariation);
@@ -91,9 +67,9 @@ void main() {
   vec3 baseColor = mix(adjustedTipColor, col.rgb, frc);
   baseColor = mix(adjustedBottomColor, baseColor, frc);
 
-  vec3 finalColor = baseColor * diff * lightColor + spec * lightColor;
+  vec3 finalColor = baseColor * lightColor * lightColor * lightIntensity;
 
-  finalColor += baseColor * translucencyFactor * lightColor;
+  finalColor += baseColor * lightColor;
 
   finalColor = clamp(finalColor, 0.0, 1.0);
 

@@ -4,18 +4,11 @@ precision mediump float;
 uniform sampler2D map1;
 uniform sampler2D map2;
 uniform sampler2D map3;
+uniform sampler2D map4;
 uniform sampler2D alphaMap1;
 uniform sampler2D alphaMap2;
 uniform sampler2D alphaMap3;
-uniform sampler2D normalMap1;
-uniform sampler2D normalMap2;
-uniform sampler2D normalMap3;
-uniform sampler2D roughnessMap1;
-uniform sampler2D roughnessMap2;
-uniform sampler2D roughnessMap3;
-uniform sampler2D translucencyMap1;
-uniform sampler2D translucencyMap2;
-uniform sampler2D translucencyMap3;
+uniform sampler2D alphaMap4;
 
 uniform vec3 tipColor;
 uniform vec3 bottomColor;
@@ -35,15 +28,18 @@ void main() {
   float roughness;
   float translucency;
 
-  if (vTextureIndex < 0.3333) {
+  if (vTextureIndex < 0.25) {
     col = texture2D(map1, vUv);
     alpha = texture2D(alphaMap1, vUv).r;
-  } else if (vTextureIndex < 0.6666) {
+  } else if (vTextureIndex < 0.5) {
     col = texture2D(map2, vUv);
     alpha = texture2D(alphaMap2, vUv).r;
-  } else {
+  } else if (vTextureIndex < 0.75) {
     col = texture2D(map3, vUv);
     alpha = texture2D(alphaMap3, vUv).r;
+  } else {
+    col = texture2D(map4, vUv);
+    alpha = texture2D(alphaMap4, vUv).r;
   }
 
   if (alpha < 0.15) discard;

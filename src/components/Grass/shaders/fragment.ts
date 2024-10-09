@@ -35,7 +35,7 @@ void main() {
   float roughness;
   float translucency;
 
-  if (vTextureIndex < 0.3333) {
+  if (vTextureIndex < 0.3332223) {
     col = texture2D(map1, vUv);
     alpha = texture2D(alphaMap1, vUv).r;
     normalMap = texture2D(normalMap1, vUv).rgb;

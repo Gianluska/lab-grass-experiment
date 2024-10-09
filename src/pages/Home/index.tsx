@@ -1,5 +1,5 @@
 import { Grass } from "@components/Grass";
-import { OrbitControls, Sky, Stars, Stats } from "@react-three/drei";
+import { OrbitControls, Sky, Stats } from "@react-three/drei";
 import { Suspense } from "react";
 
 export function Home() {

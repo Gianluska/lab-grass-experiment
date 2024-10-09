@@ -9,7 +9,7 @@ export const perlinNoise = `
     return mod289(((x * 34.0) + 1.0) * x);
   }
   float snoise(vec2 v) {
-    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+    const vec4 C = vec4(0.211324812365405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
     vec2 i = floor(v + dot(v, C.yy));
     vec2 x0 = v - i + dot(i, C.xx);
     vec2 i1;

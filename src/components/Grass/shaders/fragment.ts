@@ -55,7 +55,7 @@ void main() {
 
   vec3 lightDir = normalize(vec3(-0.3, -1.0, -0.3));
   vec3 lightColor = vec3(0.5, 0.5, 0.7); 
-  float lightIntensity = 5.0;
+  float lightIntensity = 12.0;
 
   vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
   vec3 adjustedBottomColor = bottomColor * (1.0 + vColorVariation);

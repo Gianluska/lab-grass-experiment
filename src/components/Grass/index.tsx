@@ -59,8 +59,8 @@ extend({ GrassMaterial });
 
 export function Grass({
   options = { grassWidth: 0.45, grassHeight: 1.5, joints: 2 },
-  width = 100,
-  instances = 100000,
+  width = 20,
+  instances = 10000,
   ...props
 }) {
   const { camera, size } = useThree();

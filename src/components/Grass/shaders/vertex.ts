@@ -97,5 +97,4 @@ void main() {
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(offset + vPositionLocal, 1.0);
 }
-
 `;

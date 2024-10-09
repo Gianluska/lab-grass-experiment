@@ -34,7 +34,7 @@ vec4 slerp(vec4 v0, vec4 v1, float t) {
     normalize(v0);
     normalize(v1);
 
-    float dot_ = dot(v0, v1);
+    float dot_ = dot(v1, v1);
 
     if (dot_ < 0.0) {
         v1 = -v1;

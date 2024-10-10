@@ -18,20 +18,19 @@ import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
 
-import grassTexture4 from "/textures/grass/texture.jpg";
-import grassAlpha4 from "/textures/grass/alpha_map.jpg";
+import grassTexture4 from "/textures/grass/blade_diffuse.jpg";
+import grassAlpha4 from "/textures/grass/blade_alpha.jpg";
 
 import { Terrain } from "@components/Terrain";
-import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
 
 const GrassMaterial = shaderMaterial(
   {
-    bladeHeight: 0.15,
+    bladeHeight: 0.25,
     map4: null,
     alphaMap4: null,
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
-    bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
+    bottomColor: new Color(0.14, 0.1, 0.0).convertSRGBToLinear(),
     mousePosition: new Vector3(0, 0, 0),
   },
   vertexShader,
@@ -45,9 +44,9 @@ const GrassMaterial = shaderMaterial(
 extend({ GrassMaterial });
 
 export function Grass({
-  options = { grassWidth: 0.05, grassHeight: 0.15, joints: 2 },
+  options = { grassWidth: 0.01, grassHeight: 0.25, joints: 2 },
   width = 20,
-  instances = 400000,
+  instances = 300000,
   ...props
 }) {
   const { camera, size } = useThree();
@@ -57,18 +56,10 @@ export function Grass({
 
   const materialRef = useRef<ShaderMaterial>();
 
-  const [texture4] = useLoader(TextureLoader, [
-    grassTexture4,
-  ]);
-
-  const [ alphaMap4] = useLoader(
-    TextureLoader,
-    [grassAlpha4]
-  );
+  const [texture4] = useLoader(TextureLoader, [grassTexture4]);
+  const [alphaMap4] = useLoader(TextureLoader, [grassAlpha4]);
 
   [texture4].forEach((texture) => {
-    // @ts-expect-error - Encoding is deprecated
-    texture.encoding = sRGBEncoding;
     texture.wrapS = texture.wrapT = RepeatWrapping;
   });
 
@@ -152,7 +143,6 @@ export function Grass({
           map4={texture4}
           alphaMap4={alphaMap4}
           mousePosition={mousePosition}
-          tipColor={new Color(0.3, 0.4, 0.2).convertSRGBToLinear()}
         />
       </mesh>
       <Terrain width={width} />

@@ -59,9 +59,10 @@ vec4 slerp(vec4 v0, vec4 v1, float t) {
 void main() {
   frc = position.y / bladeHeight;
 
+  float timeScale = time / 1.2;
   float noise = 0.0 - snoise(vec2(
-    time - offset.x / 7.0,
-    time - offset.z / 7.0
+    timeScale - offset.x / 10.0,
+    timeScale - offset.z / 10.0
   ));
 
   vec4 direction = vec4(0.0, 0.0, 0.0, 1.0);

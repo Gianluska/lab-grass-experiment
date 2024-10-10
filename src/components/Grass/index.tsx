@@ -32,6 +32,7 @@ const GrassMaterial = shaderMaterial(
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.14, 0.1, 0.0).convertSRGBToLinear(),
     mousePosition: new Vector3(0, 0, 0),
+    vCameraPosition: new Vector3(),
   },
   vertexShader,
   fragmentShader,
@@ -82,6 +83,9 @@ export function Grass({
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4;
       materialRef.current.uniforms.mousePosition.value.copy(mousePosition);
+      materialRef.current.uniforms.vCameraPosition.value.copy(
+        state.camera.position
+      );
     }
   });
 

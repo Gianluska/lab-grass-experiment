@@ -60,8 +60,8 @@ void main() {
     frc = position.y / bladeHeight;
 
     float noise = 0.0 - snoise(vec2(
-        time - offset.x / 70.0,
-        time - offset.z / 70.0
+        time - offset.x / 30.0,
+        time - offset.z / 30.0
     ));
 
     vec4 direction = vec4(0.0, 0.0, 0.0, 1.0);

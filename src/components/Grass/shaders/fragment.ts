@@ -28,19 +28,8 @@ void main() {
   float roughness;
   float translucency;
 
-  if (vTextureIndex < 0.25) {
-    col = texture2D(map1, vUv);
-    alpha = texture2D(alphaMap1, vUv).r;
-  } else if (vTextureIndex < 0.5) {
-    col = texture2D(map2, vUv);
-    alpha = texture2D(alphaMap2, vUv).r;
-  } else if (vTextureIndex < 0.75) {
-    col = texture2D(map3, vUv);
-    alpha = texture2D(alphaMap3, vUv).r;
-  } else {
-    col = texture2D(map4, vUv);
-    alpha = texture2D(alphaMap4, vUv).r;
-  }
+  col = texture2D(map4, vUv);
+  alpha = texture2D(alphaMap4, vUv).r;
 
   if (alpha < 0.15) discard;
 

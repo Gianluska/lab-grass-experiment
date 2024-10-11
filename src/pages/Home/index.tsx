@@ -1,4 +1,5 @@
 import { Grass } from "@components/Grass";
+import { InsectParticles } from "@components/Particles";
 import { OrbitControls, Sky, Stats } from "@react-three/drei";
 import { extend, useFrame } from "@react-three/fiber";
 import { useControls } from "leva";
@@ -23,12 +24,12 @@ export function Home() {
     <>
       <Sky distance={50} sunPosition={[1, 1, 0]} azimuth={0.25} />
 
-      <ambientLight intensity={0.5} color="#ffffff" />
+      <ambientLight intensity={0.5} color="#eeffeb" />
 
       <directionalLight
         position={[100, 200, 100]}
         intensity={1.3}
-        color="#ffffff"
+        color="#fdf79e"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -40,6 +41,7 @@ export function Home() {
 
       <Suspense fallback={null}>
         <Grass />
+        <InsectParticles count={1000} />
       </Suspense>
 
       <Stats />

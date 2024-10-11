@@ -19,9 +19,9 @@ import grassAlpha from "/textures/grass/blade_alpha.jpg";
 import { Terrain } from "@components/Terrain";
 
 export function Grass({
-  options = { grassWidth: 0.01, grassHeight: 0.12, joints: 2 },
+  options = { grassWidth: 0.01, grassHeight: 0.1, joints: 2 },
   width = 30,
-  instances = 1000000,
+  instances = 850000,
   ...props
 }) {
   const { grassWidth, grassHeight, joints } = options;
@@ -161,6 +161,12 @@ export function Grass({
         ));
         vPositionLocal = rotateVectorByQuaternion(vPositionLocal, windQuaternion);
 
+        vec3 worldOffset = (modelMatrix * vec4(offset, 3.0)).xyz;
+        vec3 billboardDirection = normalize(cameraPosition - worldOffset);
+        float angle = atan(billboardDirection.x, billboardDirection.z);
+        vec4 billboardQuaternion = vec4(0.0, sin(angle * 0.5), 0.0, cos(angle * 0.5));
+        vPositionLocal = rotateVectorByQuaternion(vPositionLocal, billboardQuaternion);
+
         transformed = vPositionLocal + offset;
 
         float distanceToCamera = distance(offset, cameraPosition);
@@ -171,6 +177,7 @@ export function Grass({
         vec3 grassObjectNormal = vec3(0.0, 1.0, 0.0);
         vec3 grassTransformedNormal = rotateVectorByQuaternion(grassObjectNormal, direction);
         grassTransformedNormal = rotateVectorByQuaternion(grassTransformedNormal, windQuaternion);
+        grassTransformedNormal = rotateVectorByQuaternion(grassTransformedNormal, billboardQuaternion);
         vGrassNormalWorld = normalize(mat3(modelMatrix) * grassTransformedNormal);
 
         vec4 grassWorldPosition = modelMatrix * vec4(transformed, 1.0);

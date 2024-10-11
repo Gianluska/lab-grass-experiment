@@ -25,7 +25,7 @@ import { Terrain } from "@components/Terrain";
 
 const GrassMaterial = shaderMaterial(
   {
-    bladeHeight: 0.25,
+    bladeHeight: 0.15,
     map4: null,
     alphaMap4: null,
     time: 0,
@@ -45,9 +45,9 @@ const GrassMaterial = shaderMaterial(
 extend({ GrassMaterial });
 
 export function Grass({
-  options = { grassWidth: 0.01, grassHeight: 0.25, joints: 2 },
-  width = 20,
-  instances = 300000,
+  options = { grassWidth: 0.01, grassHeight: 0.15, joints: 2 },
+  width = 30,
+  instances = 1000000,
   ...props
 }) {
   const { camera, size } = useThree();

@@ -8,7 +8,6 @@ export function createGrassGeometry(instances: number, width: number) {
   const orientations = [];
   const stretches = [];
   const colorVariations = [];
-  const textureIndices = [];
 
   for (let i = 0; i < instances; i++) {
     const offsetX = Math.random() * width - width / 2;
@@ -28,19 +27,6 @@ export function createGrassGeometry(instances: number, width: number) {
 
     const variation = (Math.random() - 0.5) * 2.5;
     colorVariations.push(variation);
-
-    const rnd = Math.random();
-    let textureIndex;
-    if (rnd < 0.65) {
-      textureIndex = 3;
-    } else if (rnd < 0.97) {
-      textureIndex = 1;
-    } else if (rnd < 0.98) {
-      textureIndex = 2;
-    } else {
-      textureIndex = 0;
-    }
-    textureIndices.push(textureIndex);
   }
 
   return {
@@ -48,6 +34,5 @@ export function createGrassGeometry(instances: number, width: number) {
     orientations,
     stretches,
     colorVariations,
-    textureIndices,
   };
 }

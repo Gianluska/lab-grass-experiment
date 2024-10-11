@@ -3,88 +3,35 @@ import {
   DoubleSide,
   PlaneGeometry,
   TextureLoader,
-  ShaderMaterial,
   RepeatWrapping,
-  Vector3,
-  Raycaster,
-  Vector2,
-  Plane,
+  MeshStandardMaterial,
+  type Mesh,
 } from "three";
-import { shaderMaterial } from "@react-three/drei";
-import { extend, useLoader, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useLoader, useFrame } from "@react-three/fiber";
+import { useRef, useMemo } from "react";
 
-import { vertexShader } from "./shaders/vertex";
-import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
+import { perlinNoise } from "./shaders/perlinNoise";
 
-import grassTexture1 from "/textures/grass/albedo/texture_01.jpg";
-import grassTexture2 from "/textures/grass/albedo/texture_02.jpg";
-import grassTexture3 from "/textures/grass/albedo/texture_03.jpg";
-import grassTexture4 from "/textures/grass/texture.jpg";
-
-import grassAlpha1 from "/textures/grass/alpha/alpha_01.jpg";
-import grassAlpha2 from "/textures/grass/alpha/alpha_02.jpg";
-import grassAlpha3 from "/textures/grass/alpha/alpha_03.jpg";
-import grassAlpha4 from "/textures/grass/alpha_map.jpg";
+import grassTexture from "/textures/grass/blade_diffuse.jpg";
+import grassAlpha from "/textures/grass/blade_alpha.jpg";
 
 import { Terrain } from "@components/Terrain";
-import { sRGBEncoding } from "@react-three/drei/helpers/deprecated";
-
-const GrassMaterial = shaderMaterial(
-  {
-    bladeHeight: 1.5,
-    map1: null,
-    map2: null,
-    map3: null,
-    map4: null,
-    alphaMap1: null,
-    alphaMap2: null,
-    alphaMap3: null,
-    alphaMap4: null,
-    time: 0,
-    tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
-    bottomColor: new Color(0.0, 0.1, 0.0).convertSRGBToLinear(),
-    mousePosition: new Vector3(0, 0, 0),
-  },
-  vertexShader,
-  fragmentShader,
-  (self) => {
-    if (!self) return;
-    self.side = DoubleSide;
-  }
-);
-
-extend({ GrassMaterial });
 
 export function Grass({
-  options = { grassWidth: 0.45, grassHeight: 1.5, joints: 2 },
-  width = 20,
-  instances = 10000,
+  options = { grassWidth: 0.01, grassHeight: 0.1, joints: 2 },
+  width = 30,
+  instances = 850000,
   ...props
 }) {
-  const { camera, size } = useThree();
-  const [mousePosition, setMousePosition] = useState(new Vector3(0, 0, 0));
-
   const { grassWidth, grassHeight, joints } = options;
 
-  const materialRef = useRef<ShaderMaterial>();
+  const materialRef = useRef<Mesh>(null);
 
-  const [texture1, texture2, texture3, texture4] = useLoader(TextureLoader, [
-    grassTexture1,
-    grassTexture2,
-    grassTexture3,
-    grassTexture4,
-  ]);
+  const [uGrassTexture] = useLoader(TextureLoader, [grassTexture]);
+  const [uGrassAlpha] = useLoader(TextureLoader, [grassAlpha]);
 
-  const [alphaMap1, alphaMap2, alphaMap3, alphaMap4] = useLoader(
-    TextureLoader,
-    [grassAlpha1, grassAlpha2, grassAlpha3, grassAlpha4]
-  );
-
-  [texture1, texture2, texture3, texture4].forEach((texture) => {
-    // @ts-expect-error - Encoding is deprecated
-    texture.encoding = sRGBEncoding;
+  [uGrassTexture].forEach((texture) => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
   });
 
@@ -103,39 +50,200 @@ export function Grass({
     [grassWidth, grassHeight, joints]
   );
 
+  const grassMaterial = useMemo(() => {
+    const material = new MeshStandardMaterial({
+      side: DoubleSide,
+      map: uGrassTexture,
+      alphaMap: uGrassAlpha,
+      transparent: false,
+      alphaTest: 0.5,
+    });
+
+    material.onBeforeCompile = (shader) => {
+      shader.uniforms.time = { value: 0 };
+      shader.uniforms.cullDistance = { value: 25 };
+      shader.uniforms.bladeHeight = { value: grassHeight };
+      shader.uniforms.tipColor = {
+        value: new Color(0.1, 0.7, 0.1).convertSRGBToLinear(),
+      };
+      shader.uniforms.bottomColor = {
+        value: new Color(0.2, 0.1, 0.0).convertSRGBToLinear(),
+      };
+
+      shader.vertexShader = `
+        ${perlinNoise}
+        ${shader.vertexShader}
+      `;
+
+      shader.vertexShader = shader.vertexShader.replace(
+        `#include <common>`,
+        `
+        #include <common>
+
+        attribute vec3 offset;
+        attribute vec4 orientation;
+        attribute float stretch;
+        attribute float colorVariation;
+
+        uniform float time;
+        uniform float bladeHeight;
+        uniform float cullDistance;
+
+        varying float frc;
+        varying float vColorVariation;
+        varying vec3 vGrassNormalWorld;
+        varying vec3 vGrassPositionWorld;
+
+        vec3 rotateVectorByQuaternion(vec3 v, vec4 q) {
+          return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+        }
+
+        vec4 slerp(vec4 v0, vec4 v1, float t) {
+          normalize(v0);
+          normalize(v1);
+
+          float dot_ = dot(v0, v1);
+
+          if (dot_ < 0.0) {
+            v1 = -v1;
+            dot_ = -dot_;
+          }
+
+          const float DOT_THRESHOLD = 0.9995;
+          if (dot_ > DOT_THRESHOLD) {
+            vec4 result = v0 + t * (v1 - v0);
+            normalize(result);
+            return result;
+          }
+
+          float theta_0 = acos(dot_);
+          float theta = theta_0 * t;
+          float sin_theta = sin(theta);
+          float sin_theta_0 = sin(theta_0);
+
+          float s0 = cos(theta) - dot_ * sin_theta / sin_theta_0;
+          float s1 = sin_theta / sin_theta_0;
+
+          return s0 * v0 + s1 * v1;
+        }
+        `
+      );
+
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        `
+        vec3 transformed = vec3( position );
+
+        frc = position.y / bladeHeight;
+
+        float timeScale = time / 1.5;
+        float noise = 0.0 - snoise(vec2(
+          timeScale - offset.x / 10.0,
+          timeScale - offset.z / 10.0
+        ));
+
+        vec4 direction = vec4(0.0, 0.0, 0.0, 1.0);
+        direction = slerp(direction, orientation, frc);
+
+        vec3 vPositionLocal = vec3(
+          position.x,
+          position.y + position.y * stretch,
+          position.z
+        );
+        vPositionLocal = rotateVectorByQuaternion(vPositionLocal, direction);
+
+        float windHalfAngle = noise * 0.35 * frc;
+        vec4 windQuaternion = normalize(vec4(
+          sin(windHalfAngle),
+          2.0,
+          -sin(windHalfAngle),
+          cos(windHalfAngle)
+        ));
+        vPositionLocal = rotateVectorByQuaternion(vPositionLocal, windQuaternion);
+
+        vec3 worldOffset = (modelMatrix * vec4(offset, 3.0)).xyz;
+        vec3 billboardDirection = normalize(cameraPosition - worldOffset);
+        float angle = atan(billboardDirection.x, billboardDirection.z);
+        vec4 billboardQuaternion = vec4(0.0, sin(angle * 0.5), 0.0, cos(angle * 0.5));
+        vPositionLocal = rotateVectorByQuaternion(vPositionLocal, billboardQuaternion);
+
+        transformed = vPositionLocal + offset;
+
+        float distanceToCamera = distance(offset, cameraPosition);
+        if (distanceToCamera > cullDistance) {
+          transformed = vec3(1e8, 1e8, 1e8);
+        }
+
+        vec3 grassObjectNormal = vec3(0.0, 1.0, 0.0);
+        vec3 grassTransformedNormal = rotateVectorByQuaternion(grassObjectNormal, direction);
+        grassTransformedNormal = rotateVectorByQuaternion(grassTransformedNormal, windQuaternion);
+        grassTransformedNormal = rotateVectorByQuaternion(grassTransformedNormal, billboardQuaternion);
+        vGrassNormalWorld = normalize(mat3(modelMatrix) * grassTransformedNormal);
+
+        vec4 grassWorldPosition = modelMatrix * vec4(transformed, 1.0);
+        vGrassPositionWorld = grassWorldPosition.xyz;
+        `
+      );
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        `#include <common>`,
+        `
+        #include <common>
+
+        varying float frc;
+        varying float vColorVariation;
+        uniform vec3 tipColor;
+        uniform vec3 bottomColor;
+
+        varying vec3 vGrassNormalWorld;
+        varying vec3 vGrassPositionWorld;
+        `
+      );
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        `#include <alphatest_fragment>`,
+        `
+        #include <alphatest_fragment>
+      
+        vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
+        vec3 adjustedBottomColor = bottomColor * (1.0 + vColorVariation);
+      
+        vec3 baseColor = mix(adjustedTipColor, diffuseColor.rgb, frc);
+        baseColor = mix(adjustedBottomColor, baseColor, frc);
+      
+        vec3 fixedNormal = vec3(0.0, 1.0, 0.0);
+        vec3 viewDir = normalize(cameraPosition - vGrassPositionWorld);
+        float fresnel = pow(1.0 - dot(fixedNormal, viewDir), 8.0);
+        float fresnelAmount = 1.5;
+      
+        baseColor = baseColor * (1.0 + fresnel * fresnelAmount);
+      
+        vec3 grassNormal = normalize(vGrassNormalWorld);
+        float cloudShadow = pow(1.0 - dot(grassNormal, viewDir), 3.0);
+        float shadowAmount = 0.25;
+        vec3 shadowColor = vec3(0.0);
+        baseColor = mix(baseColor, shadowColor, cloudShadow * shadowAmount);
+      
+        diffuseColor.rgb = baseColor;
+        `
+      );
+
+      materialRef.current!.userData.shader = shader;
+    };
+
+    return material;
+  }, [uGrassTexture, uGrassAlpha, grassHeight]);
+
   useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4;
-      materialRef.current.uniforms.mousePosition.value.copy(mousePosition);
+    if (materialRef.current && materialRef.current.userData.shader) {
+      const shader = materialRef.current.userData.shader;
+      shader.uniforms.time.value = state.clock.elapsedTime / 4;
     }
   });
 
-  useEffect(() => {
-    const raycaster = new Raycaster();
-    const mouse = new Vector2();
-
-    const handleMouseMove = (event: MouseEvent) => {
-      mouse.x = (event.clientX / size.width) * 2 - 1;
-      mouse.y = -(event.clientY / size.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-
-      const planeNormal = new Vector3(0, 1, 0);
-      const plane = new Plane(planeNormal, 0);
-
-      const intersectionPoint = new Vector3();
-      raycaster.ray.intersectPlane(plane, intersectionPoint);
-
-      setMousePosition(intersectionPoint);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [camera, size]);
-
   return (
-    <group {...props}>
-      <mesh>
+    <group {...props} castShadow receiveShadow>
+      <mesh material={grassMaterial} ref={materialRef}>
         <instancedBufferGeometry
           index={baseGeom.index}
           attributes={baseGeom.attributes}
@@ -156,26 +264,7 @@ export function Grass({
             attach="attributes-colorVariation"
             args={[new Float32Array(attributeData.colorVariations), 1]}
           />
-          <instancedBufferAttribute
-            attach="attributes-textureIndex"
-            args={[new Float32Array(attributeData.textureIndices), 1]}
-          />
         </instancedBufferGeometry>
-
-        {/* @ts-expect-error - Custom grassMaterial */}
-        <grassMaterial
-          ref={materialRef}
-          map1={texture1}
-          map2={texture2}
-          map3={texture3}
-          map4={texture4}
-          alphaMap1={alphaMap1}
-          alphaMap2={alphaMap2}
-          alphaMap3={alphaMap3}
-          alphaMap4={alphaMap4}
-          mousePosition={mousePosition}
-          tipColor={new Color(0.3, 0.4, 0.2).convertSRGBToLinear()}
-        />
       </mesh>
       <Terrain width={width} />
     </group>

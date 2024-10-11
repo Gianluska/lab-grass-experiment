@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Home } from "./pages/Home";
 
 import "./index.css";
+import { Leva } from "leva";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       >
         <Home />
       </Canvas>
+      <Leva hidden />
     </div>
   );
 }

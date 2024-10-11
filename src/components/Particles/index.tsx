@@ -15,9 +15,9 @@ function createParticleGeometry(count: number) {
 
   for (let i = 0; i < count; i++) {
     positions.push(
-      (Math.random() - 0.5) * 20, // X
-      Math.random(),      // Y
-      (Math.random() - 0.5) * 20  // Z
+      (Math.random() - 0.5) * 20,
+      Math.random(),
+      (Math.random() - 0.5) * 20
     );
 
     velocities.push(

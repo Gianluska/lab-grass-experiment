@@ -7,16 +7,13 @@ attribute vec3 offset;
 attribute vec4 orientation;
 attribute float stretch;
 attribute float colorVariation;
-attribute float textureIndex;
 
 uniform float time;
 uniform float bladeHeight;
-uniform vec3 mousePosition;
 
 varying vec2 vUv;
 varying float frc;
 varying float vColorVariation;
-varying float vTextureIndex;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
@@ -87,8 +84,6 @@ void main() {
   vec3 objectNormal = vec3(0.0, 1.0, 0.0);
   vec3 transformedNormal = rotateVectorByQuaternion(objectNormal, direction);
   vNormal = normalize(normalMatrix * transformedNormal);
-
-  vTextureIndex = textureIndex / 3.0;
 
   vUv = uv;
   vColorVariation = colorVariation;

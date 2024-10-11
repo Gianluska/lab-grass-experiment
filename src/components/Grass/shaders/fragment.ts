@@ -13,7 +13,6 @@ uniform float time;
 varying vec2 vUv;
 varying float frc;
 varying float vColorVariation;
-varying float vTextureIndex;
 uniform vec3 vCameraPosition;
 
 varying vec3 vNormal;

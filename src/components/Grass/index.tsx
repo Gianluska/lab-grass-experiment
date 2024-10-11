@@ -105,10 +105,6 @@ export function Grass({
             attach="attributes-colorVariation"
             args={[new Float32Array(attributeData.colorVariations), 1]}
           />
-          <instancedBufferAttribute
-            attach="attributes-textureIndex"
-            args={[new Float32Array(attributeData.textureIndices), 1]}
-          />
         </instancedBufferGeometry>
 
         {/* @ts-expect-error - Custom grassMaterial */}

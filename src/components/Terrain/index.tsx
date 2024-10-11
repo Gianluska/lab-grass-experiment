@@ -22,7 +22,7 @@ export function Terrain({ width = 30 }) {
   }, [width]);
 
   return (
-    <mesh geometry={groundGeo}>
+    <mesh geometry={groundGeo} castShadow receiveShadow>
       <meshStandardMaterial side={DoubleSide} color="#3f2b07" />
     </mesh>
   );

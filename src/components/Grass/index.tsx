@@ -5,6 +5,7 @@ import {
   TextureLoader,
   RepeatWrapping,
   MeshStandardMaterial,
+  type Mesh,
 } from "three";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { useRef, useMemo } from "react";
@@ -18,14 +19,14 @@ import grassAlpha from "/textures/grass/blade_alpha.jpg";
 import { Terrain } from "@components/Terrain";
 
 export function Grass({
-  options = { grassWidth: 0.01, grassHeight: 0.15, joints: 2 },
+  options = { grassWidth: 0.01, grassHeight: 0.12, joints: 2 },
   width = 30,
   instances = 1000000,
   ...props
 }) {
   const { grassWidth, grassHeight, joints } = options;
 
-  const materialRef = useRef<MeshStandardMaterial>(null);
+  const materialRef = useRef<Mesh>(null);
 
   const [uGrassTexture] = useLoader(TextureLoader, [grassTexture]);
   const [uGrassAlpha] = useLoader(TextureLoader, [grassAlpha]);
@@ -49,39 +50,31 @@ export function Grass({
     [grassWidth, grassHeight, joints]
   );
 
-  useFrame((state) => {
-    if (materialRef.current && materialRef.current.userData.shader) {
-      materialRef.current.userData.shader.uniforms.time.value =
-        state.clock.elapsedTime / 4;
-    }
-  });
-
   const grassMaterial = useMemo(() => {
     const material = new MeshStandardMaterial({
       side: DoubleSide,
       map: uGrassTexture,
       alphaMap: uGrassAlpha,
-      transparent: true,
-      alphaTest: 0.5, // Adicione isto para ativar o descarte baseado no alpha
+      transparent: false,
+      alphaTest: 0.5,
     });
 
     material.onBeforeCompile = (shader) => {
       shader.uniforms.time = { value: 0 };
+      shader.uniforms.cullDistance = { value: 25 };
       shader.uniforms.bladeHeight = { value: grassHeight };
       shader.uniforms.tipColor = {
-        value: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
+        value: new Color(0.1, 0.7, 0.1).convertSRGBToLinear(),
       };
       shader.uniforms.bottomColor = {
-        value: new Color(0.14, 0.1, 0.0).convertSRGBToLinear(),
+        value: new Color(0.2, 0.1, 0.0).convertSRGBToLinear(),
       };
 
-      // Adicione o código do perlin noise
       shader.vertexShader = `
         ${perlinNoise}
         ${shader.vertexShader}
       `;
 
-      // Adicione atributos e uniforms personalizados
       shader.vertexShader = shader.vertexShader.replace(
         `#include <common>`,
         `
@@ -94,9 +87,12 @@ export function Grass({
 
         uniform float time;
         uniform float bladeHeight;
+        uniform float cullDistance;
 
         varying float frc;
         varying float vColorVariation;
+        varying vec3 vGrassNormalWorld;
+        varying vec3 vGrassPositionWorld;
 
         vec3 rotateVectorByQuaternion(vec3 v, vec4 q) {
           return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
@@ -133,7 +129,6 @@ export function Grass({
         `
       );
 
-      // Modifique a transformação da posição
       shader.vertexShader = shader.vertexShader.replace(
         "#include <begin_vertex>",
         `
@@ -141,7 +136,7 @@ export function Grass({
 
         frc = position.y / bladeHeight;
 
-        float timeScale = time / 1.2;
+        float timeScale = time / 1.5;
         float noise = 0.0 - snoise(vec2(
           timeScale - offset.x / 10.0,
           timeScale - offset.z / 10.0
@@ -167,10 +162,22 @@ export function Grass({
         vPositionLocal = rotateVectorByQuaternion(vPositionLocal, windQuaternion);
 
         transformed = vPositionLocal + offset;
+
+        float distanceToCamera = distance(offset, cameraPosition);
+        if (distanceToCamera > cullDistance) {
+          transformed = vec3(1e8, 1e8, 1e8);
+        }
+
+        vec3 grassObjectNormal = vec3(0.0, 1.0, 0.0);
+        vec3 grassTransformedNormal = rotateVectorByQuaternion(grassObjectNormal, direction);
+        grassTransformedNormal = rotateVectorByQuaternion(grassTransformedNormal, windQuaternion);
+        vGrassNormalWorld = normalize(mat3(modelMatrix) * grassTransformedNormal);
+
+        vec4 grassWorldPosition = modelMatrix * vec4(transformed, 1.0);
+        vGrassPositionWorld = grassWorldPosition.xyz;
         `
       );
 
-      // Adicione varyings e uniforms ao fragment shader
       shader.fragmentShader = shader.fragmentShader.replace(
         `#include <common>`,
         `
@@ -180,22 +187,36 @@ export function Grass({
         varying float vColorVariation;
         uniform vec3 tipColor;
         uniform vec3 bottomColor;
+
+        varying vec3 vGrassNormalWorld;
+        varying vec3 vGrassPositionWorld;
         `
       );
 
-      // Modifique a cor final após o processamento do alphaMap e do alphaTest
       shader.fragmentShader = shader.fragmentShader.replace(
         `#include <alphatest_fragment>`,
         `
         #include <alphatest_fragment>
-
-        // Nosso código personalizado
+      
         vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
         vec3 adjustedBottomColor = bottomColor * (1.0 + vColorVariation);
-
+      
         vec3 baseColor = mix(adjustedTipColor, diffuseColor.rgb, frc);
         baseColor = mix(adjustedBottomColor, baseColor, frc);
-
+      
+        vec3 fixedNormal = vec3(0.0, 1.0, 0.0);
+        vec3 viewDir = normalize(cameraPosition - vGrassPositionWorld);
+        float fresnel = pow(1.0 - dot(fixedNormal, viewDir), 8.0);
+        float fresnelAmount = 1.5;
+      
+        baseColor = baseColor * (1.0 + fresnel * fresnelAmount);
+      
+        vec3 grassNormal = normalize(vGrassNormalWorld);
+        float cloudShadow = pow(1.0 - dot(grassNormal, viewDir), 3.0);
+        float shadowAmount = 0.25;
+        vec3 shadowColor = vec3(0.0);
+        baseColor = mix(baseColor, shadowColor, cloudShadow * shadowAmount);
+      
         diffuseColor.rgb = baseColor;
         `
       );
@@ -206,8 +227,15 @@ export function Grass({
     return material;
   }, [uGrassTexture, uGrassAlpha, grassHeight]);
 
+  useFrame((state) => {
+    if (materialRef.current && materialRef.current.userData.shader) {
+      const shader = materialRef.current.userData.shader;
+      shader.uniforms.time.value = state.clock.elapsedTime / 4;
+    }
+  });
+
   return (
-    <group {...props}>
+    <group {...props} castShadow receiveShadow>
       <mesh material={grassMaterial} ref={materialRef}>
         <instancedBufferGeometry
           index={baseGeom.index}

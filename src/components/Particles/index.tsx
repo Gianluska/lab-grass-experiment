@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   ShaderMaterial,
   AdditiveBlending,
   BufferGeometry,
   Float32BufferAttribute,
-} from 'three';
+} from "three";
 
 function createParticleGeometry(count: number) {
   const geometry = new BufferGeometry();
@@ -29,13 +29,12 @@ function createParticleGeometry(count: number) {
     sizes.push(Math.random() * 0.08);
   }
 
-  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-  geometry.setAttribute('velocity', new Float32BufferAttribute(velocities, 3));
-  geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1));
+  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("velocity", new Float32BufferAttribute(velocities, 3));
+  geometry.setAttribute("size", new Float32BufferAttribute(sizes, 1));
 
   return geometry;
 }
-
 
 export function InsectParticles({ count = 1000 }) {
   const particleMaterial = useMemo(() => {
@@ -52,9 +51,18 @@ export function InsectParticles({ count = 1000 }) {
         void main() {
           vec3 pos = position + velocity * time;
 
+          // Defina os limites da área
+          float limit = 10.0;
+
+          // Aplica movimento errático usando funções seno
           pos.x += sin(time * velocity.x * 2.0) * 0.5;
           pos.y += sin(time * velocity.y * 2.0) * 0.5;
           pos.z += sin(time * velocity.z * 2.0) * 0.5;
+
+          // Implementa o rebote nas bordas
+          pos.x = mod(pos.x + limit, 2.0 * limit) - limit;
+          pos.y = mod(pos.y + limit, 2.0 * limit) - limit;
+          pos.z = mod(pos.z + limit, 2.0 * limit) - limit;
 
           vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
           gl_PointSize = size * (300.0 / -mvPosition.z);
@@ -62,6 +70,7 @@ export function InsectParticles({ count = 1000 }) {
 
           vColor = vec4(abs(velocity), 1.0);
         }
+
       `,
       fragmentShader: `
         varying vec4 vColor;
@@ -79,16 +88,14 @@ export function InsectParticles({ count = 1000 }) {
     });
   }, []);
 
-  const particleGeometry = useMemo(() => createParticleGeometry(count), [count]);
+  const particleGeometry = useMemo(
+    () => createParticleGeometry(count),
+    [count]
+  );
 
   useFrame(({ clock }) => {
     particleMaterial.uniforms.time.value = clock.getElapsedTime();
   });
 
-  return (
-    <points
-      geometry={particleGeometry}
-      material={particleMaterial}
-    />
-  );
+  return <points geometry={particleGeometry} material={particleMaterial} />;
 }

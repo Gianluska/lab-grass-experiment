@@ -3,8 +3,8 @@ import { perlinNoise } from "./perlinNoise";
 export const fragmentShader = `
 precision mediump float;
 
-uniform sampler2D map4;
-uniform sampler2D alphaMap4;
+uniform sampler2D uGrassTexture;
+uniform sampler2D uGrassAlpha;
 
 uniform vec3 tipColor;
 uniform vec3 bottomColor;
@@ -28,8 +28,8 @@ void main() {
   float roughness;
   float translucency;
 
-  col = texture2D(map4, vUv);
-  alpha = texture2D(alphaMap4, vUv).r;
+  col = texture2D(uGrassTexture, vUv);
+  alpha = texture2D(uGrassAlpha, vUv).r;
 
   if (alpha < 0.15) discard;
 

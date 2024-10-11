@@ -31,12 +31,8 @@ export function createGrassGeometry(instances: number, width: number) {
 
     const rnd = Math.random();
     let textureIndex;
-    if (rnd < 0.65) {
-      textureIndex = 3;
-    } else if (rnd < 0.97) {
+    if (rnd < 0.1) {
       textureIndex = 1;
-    } else if (rnd < 0.98) {
-      textureIndex = 2;
     } else {
       textureIndex = 0;
     }

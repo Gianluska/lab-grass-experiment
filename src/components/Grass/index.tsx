@@ -18,16 +18,16 @@ import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
 import { createGrassGeometry } from "./createGrassGeometry";
 
-import grassTexture4 from "/textures/grass/blade_diffuse.jpg";
-import grassAlpha4 from "/textures/grass/blade_alpha.jpg";
+import grassTexture from "/textures/grass/blade_diffuse.jpg";
+import grassAlpha from "/textures/grass/blade_alpha.jpg";
 
 import { Terrain } from "@components/Terrain";
 
 const GrassMaterial = shaderMaterial(
   {
     bladeHeight: 0.15,
-    map4: null,
-    alphaMap4: null,
+    uGrassTexture: null,
+    uGrassAlpha: null,
     time: 0,
     tipColor: new Color(0.1, 0.4, 0.2).convertSRGBToLinear(),
     bottomColor: new Color(0.14, 0.1, 0.0).convertSRGBToLinear(),
@@ -57,10 +57,10 @@ export function Grass({
 
   const materialRef = useRef<ShaderMaterial>();
 
-  const [texture4] = useLoader(TextureLoader, [grassTexture4]);
-  const [alphaMap4] = useLoader(TextureLoader, [grassAlpha4]);
+  const [uGrassTexture] = useLoader(TextureLoader, [grassTexture]);
+  const [uGrassAlpha] = useLoader(TextureLoader, [grassAlpha]);
 
-  [texture4].forEach((texture) => {
+  [uGrassTexture].forEach((texture) => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
   });
 
@@ -144,8 +144,8 @@ export function Grass({
         {/* @ts-expect-error - Custom grassMaterial */}
         <grassMaterial
           ref={materialRef}
-          map4={texture4}
-          alphaMap4={alphaMap4}
+          uGrassTexture={uGrassTexture}
+          uGrassAlpha={uGrassAlpha}
           mousePosition={mousePosition}
         />
       </mesh>

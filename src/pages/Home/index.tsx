@@ -1,4 +1,3 @@
-import { Flowers } from "@components/Flowers";
 import { Grass } from "@components/Grass";
 import { OrbitControls, Sky, Stats } from "@react-three/drei";
 import { extend, useFrame } from "@react-three/fiber";
@@ -24,11 +23,11 @@ export function Home() {
     <>
       <Sky distance={50} sunPosition={[1, 1, 0]} azimuth={0.25} />
 
-      <ambientLight intensity={0.5} color="#ffffff" />
+      <ambientLight intensity={0.2} color="#ffffff" />
 
       <directionalLight
         position={[100, 200, 100]}
-        intensity={0.5}
+        intensity={0.3}
         color="#ffffff"
         castShadow
         shadow-mapSize-width={2048}
@@ -41,7 +40,6 @@ export function Home() {
 
       <Suspense fallback={null}>
         <Grass />
-        <Flowers count={500} width={20} />
       </Suspense>
 
       <Stats />

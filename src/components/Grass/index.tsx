@@ -6,13 +6,10 @@ import {
   ShaderMaterial,
   RepeatWrapping,
   Vector3,
-  Raycaster,
-  Vector2,
-  Plane,
 } from "three";
 import { shaderMaterial } from "@react-three/drei";
-import { extend, useLoader, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { extend, useLoader, useFrame } from "@react-three/fiber";
+import { useRef, useMemo } from "react";
 
 import { vertexShader } from "./shaders/vertex";
 import { fragmentShader } from "./shaders/fragment";
@@ -50,9 +47,6 @@ export function Grass({
   instances = 1000000,
   ...props
 }) {
-  const { camera, size } = useThree();
-  const [mousePosition, setMousePosition] = useState(new Vector3(0, 0, 0));
-
   const { grassWidth, grassHeight, joints } = options;
 
   const materialRef = useRef<ShaderMaterial>();
@@ -82,35 +76,11 @@ export function Grass({
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4;
-      materialRef.current.uniforms.mousePosition.value.copy(mousePosition);
       materialRef.current.uniforms.vCameraPosition.value.copy(
         state.camera.position
       );
     }
   });
-
-  useEffect(() => {
-    const raycaster = new Raycaster();
-    const mouse = new Vector2();
-
-    const handleMouseMove = (event: MouseEvent) => {
-      mouse.x = (event.clientX / size.width) * 2 - 1;
-      mouse.y = -(event.clientY / size.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-
-      const planeNormal = new Vector3(0, 1, 0);
-      const plane = new Plane(planeNormal, 0);
-
-      const intersectionPoint = new Vector3();
-      raycaster.ray.intersectPlane(plane, intersectionPoint);
-
-      setMousePosition(intersectionPoint);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [camera, size]);
 
   return (
     <group {...props}>
@@ -146,7 +116,6 @@ export function Grass({
           ref={materialRef}
           uGrassTexture={uGrassTexture}
           uGrassAlpha={uGrassAlpha}
-          mousePosition={mousePosition}
         />
       </mesh>
       <Terrain width={width} />

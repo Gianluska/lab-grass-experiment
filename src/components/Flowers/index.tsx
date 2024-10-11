@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { getYPosition } from "utils/simpleNoise";
-import { Mesh, Group } from "three";
+import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 
 interface FlowersProps {
@@ -57,6 +57,7 @@ export function Flowers({ count = 100, width = 20 }: FlowersProps) {
           <FlowerInstance
             key={i}
             gltf={gltf}
+            // @ts-expect-error - TS doesn't like the spread operator here
             position={position}
             index={i}
             flowerRefs={flowerRefs}
@@ -68,13 +69,19 @@ export function Flowers({ count = 100, width = 20 }: FlowersProps) {
 }
 
 interface FlowerInstanceProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gltf: any;
   position: [number, number, number];
   index: number;
   flowerRefs: React.MutableRefObject<Group[]>;
 }
 
-function FlowerInstance({ gltf, position, index, flowerRefs }: FlowerInstanceProps) {
+function FlowerInstance({
+  gltf,
+  position,
+  index,
+  flowerRefs,
+}: FlowerInstanceProps) {
   const ref = useRef<Group>(null);
 
   useEffect(() => {

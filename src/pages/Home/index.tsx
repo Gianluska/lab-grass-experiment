@@ -23,11 +23,11 @@ export function Home() {
     <>
       <Sky distance={50} sunPosition={[1, 1, 0]} azimuth={0.25} />
 
-      <ambientLight intensity={0.2} color="#ffffff" />
+      <ambientLight intensity={0.5} color="#ffffff" />
 
       <directionalLight
         position={[100, 200, 100]}
-        intensity={0.3}
+        intensity={1.3}
         color="#ffffff"
         castShadow
         shadow-mapSize-width={2048}

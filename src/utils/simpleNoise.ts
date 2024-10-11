@@ -1,6 +1,7 @@
 import SimplexNoise from "simplex-noise";
 
-const simplex = new SimplexNoise(Math.random)
+const SEED = 40;
+const simplex = new SimplexNoise(SEED)
 
 export const getYPosition = (x: number, z:number) => {
   let y = 2 * simplex.noise2D(x / 50, z / 50);

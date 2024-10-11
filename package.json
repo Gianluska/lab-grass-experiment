@@ -15,6 +15,7 @@
     "@react-three/postprocessing": "^2.16.3",
     "@types/three": "^0.169.0",
     "@wyw-in-js/babel-preset": "^0.5.4",
+    "leva": "^0.9.35",
     "postprocessing": "^6.36.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

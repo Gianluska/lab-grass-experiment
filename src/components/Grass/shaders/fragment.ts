@@ -1,3 +1,5 @@
+import { perlinNoise } from "./perlinNoise";
+
 export const fragmentShader = `
 precision mediump float;
 
@@ -6,6 +8,7 @@ uniform sampler2D alphaMap4;
 
 uniform vec3 tipColor;
 uniform vec3 bottomColor;
+uniform float time;
 
 varying vec2 vUv;
 varying float frc;
@@ -15,6 +18,8 @@ uniform vec3 vCameraPosition;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
+
+${perlinNoise}
 
 void main() {
   vec4 col;
@@ -40,9 +45,15 @@ void main() {
 
   vec3 finalNormal = normalize(TBN * tangentNormal);
 
+  float cloudSpeed = 0.3;
+  vec2 cloudUV = vPosition.xz * 0.1 + vec2(time * cloudSpeed, 0.0); // Escala e movimento
+  float cloudNoise = snoise(cloudUV);
+
+  float cloudShadow = smoothstep(0.1, 1.1, cloudNoise);
+
   vec3 lightDir = normalize(vec3(-0.3, -1.0, -0.3));
   vec3 lightColor = vec3(0.5, 0.5, 0.7); 
-  float lightIntensity = 3.5;
+  float lightIntensity = mix(1.0, 0.5, cloudShadow) * 3.5;
 
   vec3 adjustedTipColor = tipColor * (1.0 + vColorVariation);
   vec3 adjustedBottomColor = bottomColor * (1.0 + vColorVariation);
@@ -57,4 +68,4 @@ void main() {
   gl_FragColor = vec4(finalColor, 1.0);
 }
 
-`
+`;

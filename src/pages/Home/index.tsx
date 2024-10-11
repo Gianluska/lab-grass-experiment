@@ -1,20 +1,29 @@
 import { Grass } from "@components/Grass";
-import { OrbitControls, Sky, Stats } from "@react-three/drei";
+import { OrbitControls, Sky, Stars, Stats } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useControls } from "leva";
 import { Suspense } from "react";
 
 export function Home() {
+  const { cameraPosition } = useControls('Camera', {
+    cameraPosition: {
+      value: { x: 8.6, y: -0.8, z: -7.8 },
+      step: 0.1,
+    },
+  });
+
+  useFrame(({ camera }) => {
+    camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+  });
+  
   return (
     <>
       <Sky
-        distance={450000}
-        sunPosition={[0, 1, 0]}
+        distance={50}
+        sunPosition={[1, 1, 0]}
         inclination={0}
-        azimuth={0.25}
-        rayleigh={2}
-        turbidity={10}
-        mieCoefficient={0.005}
-        mieDirectionalG={0.8}
       />
+      <Stars fade depth={200} />
 
       <ambientLight intensity={0.1} color="#ffffff" />
 
